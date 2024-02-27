@@ -1,0 +1,106 @@
+// команда для первого запуска контейнера 
+docker-compose up --build 
+// команда для последующего запуска docker-compose 
+docker-compose up
+
+// установка sequelize с доп библиотеками ( драйвер PostgreSQL (pg), и дополнительный модуль (pg-hstore), который используется для хранения данных в формате hstore.)
+npm install sequelize pg pg-hstore
+
+//дополнительный пакет Sequelize CLI, который предоставляет команды для создания и выполнения миграций.
+npm install sequelize-cli
+
+// создание миграции для модели
+npx sequelize-cli migration:generate --name <имя_миграции>
+
+// запускает файлы миграции для того чтобы они появились в db
+npx sequelize-cli db:migrate
+
+// для создания файла seed
+npx sequelize-cli seed:generate --name <SeederName>
+
+
+// для запуска seed
+npx sequelize-cli db:seed --seed <seed-file-name>
+
+
+
+
+запуск на серваке
+
+NODE_ENV=production npx sequelize db:migrate
+
+NODE_ENV=production npx sequelize db:seed:all
+
+
+Запуск daemon
+npm i pm2 -g
+
+pm2 start "npm run prod" --name hh.kz
+
+npx sequelize-cli db:migrate:undo:all
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed --seed seedproduct.js
+
+cd /etc/nginx/sites-available 
+nano default
+
+nginx server config for nextjs
+https://habr.com/ru/articles/706838/
+----------------------------------------------------------------------------------------------------------------------
+server {
+
+	root /var/www/nextjs/.next/server/pages;
+
+	index index.html index.htm index.nginx-debian.html;
+
+	server_name scvolokno.kz;
+	
+	location @proxy {
+	include proxy_params;
+
+	proxy_pass http://localhost:3000;
+	}
+
+	location / {
+		try_files $uri $uri/ $uri/index.html @proxy;
+		
+	}
+
+	location /api {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+	location /public {
+	proxy_pass http://localhost:8000;
+
+}
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/scvolokno.kz/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/scvolokno.kz/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = scvolokno.kz) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	server_name scvolokno.kz;
+    return 404; # managed by Certbot
+
+
+}
+- link for create ssl certificate
+https://support.hostinger.com/en/articles/6865487-how-to-install-ssl-on-vps-using-certbot
