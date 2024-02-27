@@ -1,0 +1,20 @@
+Table orders {
+    id bigint [pk]
+    product_ids longtext
+    username varchar [not null]
+    address text [not null]
+    phone varchar [not null]
+    status varchar [not null]
+    totalPrice int [not null]
+}
+
+Table Product {
+    id bigint [pk]
+    mainType varchar [not null]
+    type varchar [not null]
+    name varchar [not null]
+    price int [not null]
+    count int [not null]
+    image varchar [not null]
+    description text [not null]
+}
